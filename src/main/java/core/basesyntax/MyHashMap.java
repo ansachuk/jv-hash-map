@@ -72,10 +72,6 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
         return size;
     }
 
-    public boolean isEmpty() {
-        return size == 0;
-    }
-
     private int getIndexByKey(K key) {
         int i = key != null ? key.hashCode() % capacity : 0;
         return i < 0 ? i * -1 : i;
@@ -125,7 +121,7 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
         private V value;
         private Node<K, V> next;
 
-        public Node(K key, V value) {
+        private Node(K key, V value) {
             this.key = key;
             this.value = value;
             next = null;
