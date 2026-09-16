@@ -23,29 +23,28 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
         checkIfExtensionNeedful();
 
         int index = getIndexByKey(key);
-
-        Node<K, V> newNode = new Node<>(key, value);
         Node<K, V> itemByIndex = table[index];
 
         if (itemByIndex == null) {
-            table[index] = newNode;
-        } else {
-            while (itemByIndex != null) {
-                if (Objects.equals(key, itemByIndex.key)) {
-                    itemByIndex.value = value;
-                    return;
-                }
-
-                if (itemByIndex.next == null) {
-                    itemByIndex.next = newNode;
-                    break;
-                }
-
-                itemByIndex = itemByIndex.next;
-            }
+            table[index] = new Node<>(key, value);
+            size++;
+            return;
         }
 
-        size++;
+        while (true) {
+            if (Objects.equals(key, itemByIndex.key)) {
+                itemByIndex.value = value;
+                return;
+            }
+
+            if (itemByIndex.next == null) {
+                itemByIndex.next = new Node<>(key, value);
+                size++;
+                return;
+            }
+
+            itemByIndex = itemByIndex.next;
+        }
     }
 
     @Override
@@ -89,22 +88,32 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
     }
 
     private void extend() {
-        capacity = capacity * 2;
+        capacity *= 2;
         threshold = (int) (capacity * DEFAULT_LOAD_FACTOR);
+
         Node<K, V>[] newTable = new Node[capacity];
 
         for (Node<K, V> item : table) {
             while (item != null) {
-                int indexInNewTable = getIndexByKey(item.key);
-                Node<K, V> itemByIndexInNewTable = newTable[indexInNewTable];
-                Node<K, V> newNode = new Node<>(item.key, item.value);
+                Node<K, V> next = item.next;
 
-                if (itemByIndexInNewTable == null) {
-                    newTable[indexInNewTable] = newNode;
+                int index = getIndexByKey(item.key);
+
+                item.next = null;
+
+                if (newTable[index] == null) {
+                    newTable[index] = item;
                 } else {
-                    itemByIndexInNewTable.next = newNode;
+                    Node<K, V> current = newTable[index];
+
+                    while (current.next != null) {
+                        current = current.next;
+                    }
+
+                    current.next = item;
                 }
-                item = item.next;
+
+                item = next;
             }
         }
 
